@@ -9,8 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 
-app = FastAPI(title="Eggplant Disease Detection API",
-              description="API for detecting health status of eggplants using YOLOv8 model",
+app = FastAPI(title="Eggplant Quality Detection API",
+              description="API for detecting quality of eggplants using YOLOv8 model",
               version="1.0.0")
 
 # Add CORS middleware
@@ -26,10 +26,10 @@ app.add_middleware(
 interpreter = None
 
 # Class names for the model
-class_names = ["Healthy", "Diseased"]
+class_names = ["good", "semigood", "bad"]
 
 class PredictionResponse(BaseModel):
-    class_name: str
+    quality: str
     confidence: float
 
 @app.on_event("startup")
@@ -44,7 +44,7 @@ async def startup_event():
 
 @app.get("/")
 def read_root():
-    return {"message": "Eggplant Disease Detection API is running. Use /predict endpoint to analyze images."}
+    return {"message": "Eggplant Quality Detection API is running. Use /predict endpoint to analyze images."}
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict_image(file: UploadFile = File(...)):
@@ -108,7 +108,7 @@ async def predict_image(file: UploadFile = File(...)):
             
             if predicted_class is not None:
                 return {
-                    "class_name": predicted_class,
+                    "quality": predicted_class,
                     "confidence": float(max_conf)
                 }
         
